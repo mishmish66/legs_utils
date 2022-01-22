@@ -145,4 +145,14 @@ mod tests {
         rm_test_against = RotMat::new(rotvec);
         assert!(rm == rm_test_against);
     }
+
+    #[test]
+    fn test_vel_transform_constructs() {
+        let mut vt = VelTransform::new();
+
+        let pos = Vec3::new(1.0, 0.0, 0.0);
+        vt.set_lin_vec(pos);
+
+        assert!(*vt.get_lin_vec() == pos);
+    }
 }
