@@ -1,15 +1,10 @@
-extern crate nalgebra as na;
+use super::basic::*;
+use super::na;
 use likely_stable::unlikely;
 
-pub type Vec3 = na::Vector3<f64>;
-pub type Mat3 = na::Matrix3<f64>;
-pub type Mat4 = na::Matrix4<f64>;
-pub type Vec6 = na::Vector6<f64>;
-pub type RotMat = na::Rotation3<f64>;
-
-pub(crate) struct Transform {
-    pos: PosTransform,
-    vel: VelTransform,
+pub struct Transform {
+    pub pos: PosTransform,
+    pub vel: VelTransform,
 }
 
 impl Transform {
@@ -19,45 +14,30 @@ impl Transform {
             vel: VelTransform::new(),
         }
     }
-
-    pub fn set(&mut self, pos: PosTransform, vel: VelTransform) {
-        self.pos = pos;
-        self.vel = vel;
-    }
-
-    pub fn get_pos(&self) -> &PosTransform {
-        &self.pos
-    }
-
-    pub fn get_vel(&self) -> &VelTransform {
-        &self.vel
-    }
 }
 
-pub(crate) struct PosTransform {
-    pos: Vec3,
-    rot: Vec3,
-
-    rotmat: Option<RotMat>,
-}
-
-pub(crate) struct VelTransform {
-    pos: Vec3,
+pub struct PosTransform {
+    pub pos: Vec3,
     rot: Vec3,
 }
 
-impl PosTransform {
+pub struct VelTransform {
+    pub lin: Vec3,
+    pub ang: Vec3,
+}
+
+pub struct MomTransform {
+    pub lin: Vec3,
+    pub ang: Vec3,
+}
+
+/*impl PosTransform {
     pub fn new() -> Self {
         Self {
             pos: na::zero(),
             rot: na::zero(),
             rotmat: None,
         }
-    }
-
-    pub fn assign(&mut self, pos: Vec3, rot: Vec3) {
-        self.set_lin_vec(pos);
-        self.set_rot_vec(rot);
     }
 
     pub fn get_rotmat(&mut self) -> &RotMat {
@@ -71,25 +51,12 @@ impl PosTransform {
         self.rotmat = Some(RotMat::new(self.rot));
     }
 
-    pub fn get_lin_vec(&self) -> &Vec3 {
-        &self.pos
-    }
-
-    pub fn get_rot_vec(&self) -> &Vec3 {
-        &self.rot
-    }
-
-    pub fn set_lin_vec(&mut self, pos: Vec3) {
-        self.pos = pos;
-    }
-
-    pub fn set_rot_vec(&mut self, rot: Vec3) {
+    fn set_rot(&mut self, rot: Vec3) {
         self.rot = rot;
         self.rotmat = None;
     }
-}
-
-impl VelTransform {
+}*/
+impl PosTransform {
     pub fn new() -> Self {
         Self {
             pos: na::zero(),
@@ -97,25 +64,26 @@ impl VelTransform {
         }
     }
 
-    pub fn assign(&mut self, pos: Vec3, rot: Vec3) {
-        self.pos = pos;
-        self.rot = rot;
+    pub fn get_rotmat(&self) -> RotMat {
+        RotMat::new(self.rot)
     }
+}
 
-    pub fn get_lin_vec(&self) -> &Vec3 {
-        &self.pos
+impl VelTransform {
+    pub fn new() -> Self {
+        Self {
+            lin: na::zero(),
+            ang: na::zero(),
+        }
     }
+}
 
-    pub fn get_rot_vec(&self) -> &Vec3 {
-        &self.rot
-    }
-
-    pub fn set_lin_vec(&mut self, pos: Vec3) {
-        self.pos = pos;
-    }
-
-    pub fn set_rot_vec(&mut self, rot: Vec3) {
-        self.rot = rot;
+impl MomTransform {
+    pub fn new() -> Self {
+        Self {
+            lin: na::zero(),
+            ang: na::zero(),
+        }
     }
 }
 
@@ -126,7 +94,7 @@ mod tests {
     #[test]
     fn test_transform_constructs() {
         let t = Transform::new();
-        assert!(*t.get_pos().get_lin_vec() == Vec3::new(0.0, 0.0, 0.0));
+        assert!(t.pos.pos == Vec3::new(0.0, 0.0, 0.0));
     }
 
     #[test]
@@ -134,14 +102,14 @@ mod tests {
         let mut pt = PosTransform::new();
 
         let mut rotvec = Vec3::new(1.0, 0.0, 0.0);
-        pt.set_rot_vec(rotvec);
-        let mut rm = *pt.get_rotmat();
+        pt.rot = rotvec;
+        let mut rm = pt.get_rotmat();
         let mut rm_test_against = RotMat::new(rotvec);
         assert!(rm == rm_test_against);
 
         rotvec = Vec3::new(0.0, 0.0, 1.0);
-        pt.set_rot_vec(rotvec);
-        rm = *pt.get_rotmat();
+        pt.rot = rotvec;
+        rm = pt.get_rotmat();
         rm_test_against = RotMat::new(rotvec);
         assert!(rm == rm_test_against);
     }
@@ -151,8 +119,8 @@ mod tests {
         let mut vt = VelTransform::new();
 
         let pos = Vec3::new(1.0, 0.0, 0.0);
-        vt.set_lin_vec(pos);
+        vt.lin = pos;
 
-        assert!(*vt.get_lin_vec() == pos);
+        assert!(vt.lin == pos);
     }
 }
