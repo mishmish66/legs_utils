@@ -1,26 +1,28 @@
-use crate::physics_types::{transform::*, inertial::*, basic::*};
+use std::usize;
+use super::poi::{POI, self};
+use crate::{na, physics_types::jacobianable::Jacobianable};
 
-pub(crate) struct Link {
+use crate::physics_types::{basic::*, inertial::*, transform::*};
+
+pub trait Link<const ndofs: usize>: Jacobianable<ndofs, ndofs> { }
+
+pub struct BasicLink<const dofs: usize> {
     inertial: Inertial,
-    contact_points: Vec<ContactPoint>,
 }
 
-#[derive(Clone)]
-enum ContactPoint {
-    Generic(Vec3),
-    Foot(Vec3),
-}
-
-impl Link {
-    fn new(inertial: Inertial, mass_mat: Mat3) -> Self {
-        Self {
-            inertial: inertial,
-            contact_points: Vec::new(),
-        }
+impl<const ndofs: usize> Jacobianable<ndofs, ndofs> for BasicLink<ndofs> {
+    fn get_jacobian(&self, parent_jacobian: Matrix<6, ndofs>) -> Matrix<6, ndofs> {
+        na::zero()
     }
+}
 
-    fn add_contact_point(&mut self, contact_points: &[ContactPoint]) {
-        self.contact_points.extend_from_slice(contact_points);
+impl<const ndofs: usize> Link<ndofs> for BasicLink<ndofs> { }
+
+impl<const ndofs: usize> BasicLink<ndofs> {
+    fn new() -> Self {
+        Self {
+            inertial: Inertial::new(),
+        }
     }
 
     fn get_inertia(&self) -> MomTransform {
@@ -30,13 +32,27 @@ impl Link {
 
 #[cfg(test)]
 mod tests {
-    use crate::physics_types::{na, inertial};
+    use crate::{na, physics_types::{inertial, mass::PointMass}};
 
     use super::*;
 
     #[test]
     fn test_legs_utils_link_constructs() {
-        let mass_mat = na::one();
-        let link = Link::new(Inertial::new(), mass_mat);
+        let link: BasicLink<3>  = BasicLink {
+            inertial: Inertial {
+                mass: PointMass {
+                    location: Vec3::new(1.0, 0.0, 0.0),
+                    mass: 1.0,
+                    moment: na::one(),
+                },
+                transform: Transform {
+                    pos: PosTransform {
+                        pos: Vec3::new(-1.0, 0.0, 0.0),
+                        rot: na::zero(),
+                    },
+                    vel: VelTransform::new(),
+                },
+            },
+        };
     }
 }

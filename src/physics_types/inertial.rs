@@ -1,11 +1,11 @@
 use super::basic::*;
 use super::mass::*;
-use super::na;
+use crate::na;
 use super::transform::*;
 
 pub struct Inertial {
-    transform: Transform,
-    mass: PointMass,
+    pub transform: Transform,
+    pub mass: PointMass,
 }
 
 impl Inertial {

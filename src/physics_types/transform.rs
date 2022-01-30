@@ -1,6 +1,5 @@
 use super::basic::*;
-use super::na;
-use likely_stable::unlikely;
+use crate::na;
 
 pub struct Transform {
     pub pos: PosTransform,
@@ -18,7 +17,7 @@ impl Transform {
 
 pub struct PosTransform {
     pub pos: Vec3,
-    rot: Vec3,
+    pub rot: Vec3,
 }
 
 pub struct VelTransform {
@@ -31,31 +30,6 @@ pub struct MomTransform {
     pub ang: Vec3,
 }
 
-/*impl PosTransform {
-    pub fn new() -> Self {
-        Self {
-            pos: na::zero(),
-            rot: na::zero(),
-            rotmat: None,
-        }
-    }
-
-    pub fn get_rotmat(&mut self) -> &RotMat {
-        if unlikely(self.rotmat.is_none()) {
-            self.force_rotmat_update();
-        }
-        self.rotmat.as_ref().unwrap()
-    }
-
-    fn force_rotmat_update(&mut self) {
-        self.rotmat = Some(RotMat::new(self.rot));
-    }
-
-    fn set_rot(&mut self, rot: Vec3) {
-        self.rot = rot;
-        self.rotmat = None;
-    }
-}*/
 impl PosTransform {
     pub fn new() -> Self {
         Self {

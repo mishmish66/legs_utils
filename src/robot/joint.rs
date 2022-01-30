@@ -1,56 +1,37 @@
-use crate::physics_types::{basic::*};
-use super::link::*;
+use std::process::Child;
 
-struct Joint {
+use super::link::*;
+use crate::physics_types::{basic::*, jacobianable::Jacobianable};
+
+pub trait Joint {}
+
+struct RevoluteJoint<const parent_ndofs: usize, ChildLinkType: Link<{parent_ndofs + 1}>> {
     pivot_pos: Vec3,
     pivot_axis: Vec3,
     rotor_pos: Vec3,
     rotor_inertia: Vec3,
 
-    parent_link: Link,
-    child_link: Link,
+    child_link: ChildLinkType,
+    pos: f64,
+    vel: f64,
+}
+struct PrismaticJoint<const parent_ndofs: usize, ChildLinkType: Link<{parent_ndofs + 1}>> {
+    zero_pos: Vec3,
+    move_axis: Vec3,
 
+    child_link: ChildLinkType,
     pos: f64,
     vel: f64,
 }
 
-struct FloatingBase {
-    child_link: Vec<Joint>,
+struct FloatingBase<ChildLinkType: Link<6>> {
+    child_link: ChildLinkType,
     pos: Vec6,
     vel: Vec6,
 }
 
-trait Ndof {
-    fn ndof() -> i64;
-}
+impl<const parent_ndofs: usize, ChildLinkType: Link<{parent_ndofs + 1}>> RevoluteJoint<parent_ndofs, ChildLinkType> { }
 
-impl Joint {
-    fn new(
-        pivot_pos: Vec3,
-        pivot_axis: Vec3,
-        rotor_pos: Vec3,
-        rotor_inertia: Vec3,
-        parent_link: Link,
-        child_link: Link,
-    ) -> Self {
-        Self {
-            pivot_pos: pivot_axis,
-            pivot_axis: pivot_axis,
-            rotor_pos: rotor_pos,
-            rotor_inertia: rotor_inertia,
-            parent_link: parent_link,
-            child_link: child_link,
-            pos: 0.0,
-            vel: 0.0,
-        }
-    }
-}
+impl<const parent_ndofs: usize, ChildLinkType: Link<{parent_ndofs + 1}>> Joint for RevoluteJoint<parent_ndofs, ChildLinkType> {}
 
-impl Ndof for Joint {
-    fn ndof() -> i64 { 1 }
-}
-
-impl Ndof for FloatingBase {
-    fn ndof() -> i64 { 6 }
-}
-
+impl<const parent_ndofs: usize, ChildLinkType: Link<{parent_ndofs + 1}>> Joint for PrismaticJoint<parent_ndofs, ChildLinkType> {}

@@ -1,4 +1,5 @@
-use super::{na, basic::*};
+use crate::na;
+use super::basic::*;
 
 pub struct PointMass {
     pub location: Vec3,
