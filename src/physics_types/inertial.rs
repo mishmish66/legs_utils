@@ -1,52 +1,29 @@
 use super::basic::*;
 use super::mass::*;
+use super::spatial::*;
 use crate::na;
-use super::transform::*;
 
 pub struct Inertial {
-    pub transform: Transform,
+    pub spatial: Spatial,
     pub mass: PointMass,
 }
 
 impl Inertial {
     pub fn new() -> Self {
         Self {
-            transform: Transform::new(),
+            spatial: Spatial::new(),
             mass: PointMass::new(),
         }
     }
 
-    pub fn momentum(&self) -> MomTransform {
-        let mom_lin = self.mass.mass * self.transform.vel.lin;
+    pub fn momentum(&self) -> SmallSE3 {
+        let mom_lin = self.mass.mass * self.spatial.vel.lin;
 
-        let mom_ang = self.mass.moment * self.transform.vel.ang;
+        let mom_ang = self.mass.moment * self.spatial.vel.ang;
 
-        MomTransform {
+        SmallSE3 {
             lin: mom_lin,
             ang: mom_ang,
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn inertia_constructs() {
-        let mass = PointMass {
-            location: Vec3::new(1.0, 0.0, 0.0),
-            mass: 1.0,
-            moment: na::one(),
-        };
-
-        let mut inertial = Inertial {
-            transform: Transform::new(),
-            mass: mass,
-        };
-
-        inertial.transform.vel.ang = Vec3::new(0.0, 0.0, 1.0);
-
-
     }
 }

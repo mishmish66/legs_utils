@@ -7,17 +7,16 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in library 'legs_utils'",
+            "name": "Debug unit tests in library 'ur10_kin'",
             "cargo": {
                 "args": [
-                    "+nightly",
                     "test",
                     "--no-run",
                     "--lib",
-                    "--package=legs_utils"
+                    "--package=ur10_kin"
                 ],
                 "filter": {
-                    "name": "legs_utils",
+                    "name": "ur10_kin",
                     "kind": "lib"
                 }
             },

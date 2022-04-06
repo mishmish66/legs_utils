@@ -1,5 +1,5 @@
 [package]
-name = "legs_utils"
+name = "ur10_kin"
 version = "0.1.0"
 edition = "2021"
 

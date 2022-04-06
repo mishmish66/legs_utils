@@ -1,58 +1,51 @@
-use std::usize;
+use super::joint::UR10JointEnum;
 use super::poi::{POI, self};
-use crate::{na, physics_types::jacobianable::Jacobianable};
+use crate::{na, physics_types::{mass::PointMass, basic::*, inertial::*, spatial::*}};
 
-use crate::physics_types::{basic::*, inertial::*, transform::*};
-
-pub trait Link<const ndofs: usize>: Jacobianable<ndofs, ndofs> { }
-
-pub struct BasicLink<const dofs: usize> {
-    inertial: Inertial,
+#[derive(PartialEq, Eq)]
+pub enum UR10LinkEnum {
+    BaseLink,
+    ShoulderLink,
+    UpperArmLink,
+    ElbowJoint,
+    ForearmLink,
+    Wrist1Link,
+    Wrist2Link,
+    Wrist3Link,
+    EELink,
 }
 
-impl<const ndofs: usize> Jacobianable<ndofs, ndofs> for BasicLink<ndofs> {
-    fn get_jacobian(&self, parent_jacobian: Matrix<6, ndofs>) -> Matrix<6, ndofs> {
-        na::zero()
-    }
-}
-
-impl<const ndofs: usize> Link<ndofs> for BasicLink<ndofs> { }
-
-impl<const ndofs: usize> BasicLink<ndofs> {
-    fn new() -> Self {
-        Self {
-            inertial: Inertial::new(),
+impl UR10LinkEnum {
+    const fn get_child<const L: UR10LinkEnum>() -> Option<UR10JointEnum> {
+        match L {
+            BaseLink => Some(UR10JointEnum::ShoulderPanJoint),
+            ShoulderLink => Some(UR10JointEnum::ShoulderLiftJoint),
+            UpperArmLink => Some(UR10JointEnum::ElbowJoint),
+            ForearmLink => Some(UR10JointEnum::Wrist1Joint),
+            Wrist1Link => Some(UR10JointEnum::Wrist2Joint),
+            Wrist2Link => Some(UR10JointEnum::Wrist3Joint),
+            Wrist3Link => Some(UR10JointEnum::EEFixedJoint),
+            EELink => None,
         }
     }
 
-    fn get_inertia(&self) -> MomTransform {
-        self.inertial.momentum()
+    const fn get_parent<const L: UR10LinkEnum>() -> Option<UR10JointEnum> {
+        match L {
+            BaseLink => None,
+            ShoulderLink => Some(UR10JointEnum::ShoulderPanJoint),
+            UpperArmLink => Some(UR10JointEnum::ShoulderLiftJoint),
+            ForearmLink => Some(UR10JointEnum::ElbowJoint),
+            Wrist1Link => Some(UR10JointEnum::Wrist1Joint),
+            Wrist2Link => Some(UR10JointEnum::Wrist2Joint),
+            Wrist3Link => Some(UR10JointEnum::Wrist3Joint),
+            EELink => Some(UR10JointEnum::EEFixedJoint),
+        }
     }
 }
+pub struct LinkDesc<const L: UR10LinkEnum> {
+    mass: PointMass,
+}
 
-#[cfg(test)]
-mod tests {
-    use crate::{na, physics_types::{inertial, mass::PointMass}};
+pub struct LinkState {
 
-    use super::*;
-
-    #[test]
-    fn test_legs_utils_link_constructs() {
-        let link: BasicLink<3>  = BasicLink {
-            inertial: Inertial {
-                mass: PointMass {
-                    location: Vec3::new(1.0, 0.0, 0.0),
-                    mass: 1.0,
-                    moment: na::one(),
-                },
-                transform: Transform {
-                    pos: PosTransform {
-                        pos: Vec3::new(-1.0, 0.0, 0.0),
-                        rot: na::zero(),
-                    },
-                    vel: VelTransform::new(),
-                },
-            },
-        };
-    }
 }

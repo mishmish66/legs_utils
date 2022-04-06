@@ -12,7 +12,7 @@ impl PointMass {
         Self {
             location: na::zero(),
             mass: 0.0,
-            moment: na::zero()
+            moment: na::zero(),
         }
     }
 }

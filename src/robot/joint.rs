@@ -1,37 +1,57 @@
-use std::process::Child;
+use crate::physics_types::{basic::*, spatial::*};
 
-use super::link::*;
-use crate::physics_types::{basic::*, jacobianable::Jacobianable};
+use super::link::UR10LinkEnum;
+//use crate::physics_types::{basic::*, jacobianable::Jacobianable};
 
-pub trait Joint {}
+#[derive(PartialEq, Eq)]
+pub enum UR10JointEnum {
+    ShoulderPanJoint,
+    ShoulderLiftJoint,
+    ElbowJoint,
+    Wrist1Joint,
+    Wrist2Joint,
+    Wrist3Joint,
+    EEFixedJoint,
+}
 
-struct RevoluteJoint<const parent_ndofs: usize, ChildLinkType: Link<{parent_ndofs + 1}>> {
-    pivot_pos: Vec3,
+impl UR10JointEnum {
+    const fn get_child<const J: UR10JointEnum>() -> UR10LinkEnum {
+        match J {
+            ShoulderPanJoint => UR10LinkEnum::ShoulderLink,
+            ShoulderLiftJoint => UR10LinkEnum::UpperArmLink,
+            ElbowJoint => UR10LinkEnum::ForearmLink,
+            Wrist1Joint => UR10LinkEnum::Wrist1Link,
+            Wrist2Joint => UR10LinkEnum::Wrist2Link,
+            Wrist3Joint => UR10LinkEnum::Wrist3Link,
+            EEFixedJoint => UR10LinkEnum::EELink,
+        }
+    }
+
+    const fn get_parent<const J: UR10JointEnum>() -> UR10LinkEnum {
+        match J {
+            ShoulderPanJoint => UR10LinkEnum::BaseLink,
+            ShoulderLiftJoint => UR10LinkEnum::ShoulderLink,
+            ElbowJoint => UR10LinkEnum::UpperArmLink,
+            Wrist1Joint => UR10LinkEnum::ForearmLink,
+            Wrist2Joint => UR10LinkEnum::Wrist1Link,
+            Wrist3Joint => UR10LinkEnum::Wrist2Link,
+            EEFixedJoint => UR10LinkEnum::Wrist3Link,
+        }
+    }
+}
+
+pub struct RevoluteJointDesc<const J: UR10JointEnum> {
+    pivot_pos: BigSE3,
     pivot_axis: Vec3,
-    rotor_pos: Vec3,
-    rotor_inertia: Vec3,
+    rotor_pos: BigSE3,
+    rotor_inertia: f64,
+}
 
-    child_link: ChildLinkType,
+pub struct FixedJointDesc<const J: UR10JointEnum> {
+    root_pos: BigSE3,
+}
+
+pub struct RevoluteJointState<const J: UR10JointEnum> {
     pos: f64,
     vel: f64,
 }
-struct PrismaticJoint<const parent_ndofs: usize, ChildLinkType: Link<{parent_ndofs + 1}>> {
-    zero_pos: Vec3,
-    move_axis: Vec3,
-
-    child_link: ChildLinkType,
-    pos: f64,
-    vel: f64,
-}
-
-struct FloatingBase<ChildLinkType: Link<6>> {
-    child_link: ChildLinkType,
-    pos: Vec6,
-    vel: Vec6,
-}
-
-impl<const parent_ndofs: usize, ChildLinkType: Link<{parent_ndofs + 1}>> RevoluteJoint<parent_ndofs, ChildLinkType> { }
-
-impl<const parent_ndofs: usize, ChildLinkType: Link<{parent_ndofs + 1}>> Joint for RevoluteJoint<parent_ndofs, ChildLinkType> {}
-
-impl<const parent_ndofs: usize, ChildLinkType: Link<{parent_ndofs + 1}>> Joint for PrismaticJoint<parent_ndofs, ChildLinkType> {}

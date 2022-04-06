@@ -1,17 +1,15 @@
-use crate::physics_types::{basic::*, jacobianable::Jacobianable, transform::PosTransform};
+use crate::physics_types::*;
 use crate::na;
-use crate::robot::link::Link;
+use crate::physics_types::spatial::BigSE3;
 
 pub struct POI<const dofs: usize> {
-    location: PosTransform,
-    //kinematic_parent: KinematicParentType,
+    location: BigSE3,
 }
 
 impl<const ndofs: usize> POI<ndofs> {
     fn new() -> Self {
         Self {
-            location: PosTransform::new(),
-            //kinematic_parent: None,
+            location: BigSE3::new(),
         }
     }
 }
